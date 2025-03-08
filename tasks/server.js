@@ -4,7 +4,19 @@ const admin = require("firebase-admin");
 
 require("dotenv").config();
 
-var serviceAccount = require("../task-manager-credentials.json");
+const serviceAccount = {
+  type: process.env.TYPE,
+  project_id: process.env.PROJECT_ID,
+  private_key_id: process.env.PRIVATE_KEY_ID,
+  private_key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+  client_email: process.env.CLIENT_EMAIL,
+  client_id: process.env.CLIENT_ID,
+  auth_uri: process.env.AUTH_URI,
+  token_uri: process.env.TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_CERT_URL,
+  client_x509_cert_url: process.env.CLIENT_CERT_URL,
+  universe_domain: process.env.UNIVERSE_DOMAIN,
+};
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -81,6 +93,10 @@ const verifyToken = (allowedRoles) => async (req, res, next) => {
   }
 };
 
+app.get("/", (req, res) => {
+  res.send("Tasks service running!");
+});
+
 //Obtener todas las tareas del usuario autenticado
 app.get("/tasks", verifyToken(["admin", "mortal"]), async (req, res) => {
   try {
@@ -134,7 +150,10 @@ app.post("/add-tasks", verifyToken(["admin", "mortal"]), async (req, res) => {
   }
 });
 
-app.patch("/tasks/:taskId", verifyToken(["admin", "mortal"]), async (req, res) => {
+app.patch(
+  "/tasks/:taskId",
+  verifyToken(["admin", "mortal"]),
+  async (req, res) => {
     try {
       const { taskId } = req.params;
       const { status } = req.body;
@@ -195,7 +214,10 @@ app.post("/createGroupTasks", verifyToken(["admin"]), async (req, res) => {
   }
 });
 
-app.get("/groups/:groupId/tasks", verifyToken(["admin", "mortal"]), async (req, res) => {
+app.get(
+  "/groups/:groupId/tasks",
+  verifyToken(["admin", "mortal"]),
+  async (req, res) => {
     try {
       const { groupId } = req.params;
       const tasksRef = db.collection("tasks");
@@ -222,7 +244,10 @@ app.get("/groups/:groupId/tasks", verifyToken(["admin", "mortal"]), async (req, 
   }
 );
 
-app.patch("/dropTasks/:taskId", verifyToken(["admin", "mortal"]), async (req, res) => {
+app.patch(
+  "/dropTasks/:taskId",
+  verifyToken(["admin", "mortal"]),
+  async (req, res) => {
     try {
       const { taskId } = req.params;
       const { status } = req.body;
